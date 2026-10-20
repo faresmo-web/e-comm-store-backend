@@ -4,6 +4,8 @@ const app = expores();
 const port = 3000;
 const cors = require("cors");
 const categoryRouter = require("./routes/category");
+const brandRouter = require("./routes/brand");
+const productRouter = require("./routes/product");
 
 
 app.use(cors());
@@ -14,6 +16,8 @@ app.get("/", (req,res) => {
     res.send("Server running");
 })
 app.use("/category", categoryRouter);
+app.use("/brand", brandRouter);
+app.use("/product", productRouter);
 
 
 async function connectDB() {
