@@ -21,7 +21,7 @@ app.get("/", (req,res) => {
 app.use("/category",verifyToken, isAdmin, categoryRouter);
 app.use("/brand", verifyToken, isAdmin, brandRouter);
 app.use("/product", verifyToken, isAdmin,  productRouter);
-app.use("/customer", verifyToken, customerRouter);
+app.use("/customer", customerRouter);
 app.use("/auth", authRouter);
 
 

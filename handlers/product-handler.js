@@ -39,8 +39,37 @@ async function getFeaturedProducts(){
     return featuredProducts.map((p) => p.toObject());
 }
 
+async function getProductForListing(searchQuery, categoryId,page,pageSize,sortBy,sortOrder, brandId){
+    let queryFilter = {}
+    if(!sortBy){
+        sortBy = "price"
+    }
+    if(!sortOrder){
+        sortOrder = -1
+    }
+    if(searchQuery){
+        queryFilter.$or = [{
+            name : {$regex: '.*' + searchQuery + '.*'}
+        },
+        {
+            shotDescription : {$regex: '.*' + searchQuery + '.*'}
+        }
+    ]
+    }
+    if(categoryId){
+        queryFilter.categoryId = categoryId
+    }
+    if(brandId){
+        queryFilter.brandId = brandId
+    }
+    console.log("queryFilter",queryFilter)
+    const products = await Product.find(queryFilter).sort({
+        [sortBy]: +sortOrder
+    }).skip((page-1)*pageSize).limit(pageSize);
+    return products.map(x => x.toObject())
+}
 
-
+ 
 
 module.exports = {
     addProduct,
@@ -49,5 +78,6 @@ module.exports = {
     getAllProducts,
     getProductById,
     getNewProducts,
-    getFeaturedProducts
+    getFeaturedProducts,
+    getProductForListing
 }
