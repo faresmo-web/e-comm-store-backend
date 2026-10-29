@@ -5,6 +5,8 @@ const { getNewProducts, getFeaturedProducts, getProductForListing } = require(".
 const { getCategory } = require("../handlers/category-handlers");
 const { getBrands } = require("../handlers/brand-handler");
 const { getProductById } = require("../handlers/product-handler")
+const { getWishlist, addToWishlist, removeFromWishlist } = require("../handlers/wishlist-handlers")
+const { verifyToken } = require("../middleware/auth-middleware")
 
 router.get("/new-products",  async (req, res) => {
     const products = await getNewProducts();
@@ -46,6 +48,23 @@ router.get("/products/:id", async (req, res) => {
     const  products = await getProductById(id);
     res.send(products)
 })
+router.get("/wishlists", verifyToken, async (req, res) => {
+    const userId = req.user.id
+    const item = await getWishlist(userId)
+    res.send(item)
+})
 
+router.post("/wishlists/:id", verifyToken, async (req, res) => {
+    const userId = req.user.id
+    const productsId = req.params.id
+    const item = await addToWishlist(userId, productsId)
+    res.send(item)
+})
+router.delete("/wishlists/:id", verifyToken, async (req, res) => {
+    const userId = req.user.id
+    const productsId = req.params.id
+    await removeFromWishlist(userId,productsId );
+    res.send({message: "ok"});
+})
 
 module.exports = router;
