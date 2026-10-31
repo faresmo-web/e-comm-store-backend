@@ -4,29 +4,31 @@ const router = express.Router();
 const { getNewProducts, getFeaturedProducts, getProductForListing } = require("../handlers/product-handler");
 const { getCategory } = require("../handlers/category-handlers");
 const { getBrands } = require("../handlers/brand-handler");
-const { getProductById } = require("../handlers/product-handler")
-const { getWishlist, addToWishlist, removeFromWishlist } = require("../handlers/wishlist-handlers")
-const { verifyToken } = require("../middleware/auth-middleware")
+const { getProductById } = require("../handlers/product-handler");
+const { getWishlist, addToWishlist, removeFromWishlist } = require("../handlers/wishlist-handlers");
+const { getCart, addToCart, removefromCart } = require("../handlers/cart-handlers");
+const { addOrder, getCustomerOrders } = require("../handlers/order-handler");
+const { verifyToken } = require("../middleware/auth-middleware");
 
 router.get("/new-products",  async (req, res) => {
     const products = await getNewProducts();
     res.send(products);
-})
+});
 
 router.get("/featured-products",  async (req, res) => {
     const products = await getFeaturedProducts();
     res.send(products);
-})
+});
+
 router.get("/categories",  async (req, res) => {
     const categpries = await getCategory();
     res.send(categpries);
-})
+});
 
 router.get("/brands",  async (req, res) => {
     const brands = await getBrands();
     res.send(brands);
-})
-
+});
 
 router.get("/products",  async (req, res) => {
     const {searchQuery, categoryId, sortBy, sortOrder, brandId, pageSize,page} = req.query;
@@ -38,33 +40,77 @@ router.get("/products",  async (req, res) => {
         sortBy, 
         sortOrder,
         brandId,
-       
     );
     res.send(products);
-})
+});
 
 router.get("/products/:id", async (req, res) => {
-    const id = req.params["id"]
-    const  products = await getProductById(id);
-    res.send(products)
-})
+    const id = req.params["id"];
+    const products = await getProductById(id);
+    res.send(products);
+});
+
 router.get("/wishlists", verifyToken, async (req, res) => {
-    const userId = req.user.id
-    const item = await getWishlist(userId)
-    res.send(item)
-})
+    const userId = req.user.id;
+    const item = await getWishlist(userId);
+    res.send(item);
+});
 
 router.post("/wishlists/:id", verifyToken, async (req, res) => {
-    const userId = req.user.id
-    const productsId = req.params.id
-    const item = await addToWishlist(userId, productsId)
-    res.send(item)
-})
+    const userId = req.user.id;
+    const productsId = req.params.id;
+    const item = await addToWishlist(userId, productsId);
+    res.send(item);
+});
+
 router.delete("/wishlists/:id", verifyToken, async (req, res) => {
-    const userId = req.user.id
-    const productsId = req.params.id
-    await removeFromWishlist(userId,productsId );
+    const userId = req.user.id;
+    const productsId = req.params.id;
+    await removeFromWishlist(userId, productsId);
     res.send({message: "ok"});
-})
+});
+
+router.get("/carts", verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const item = await getCart(userId);
+    res.send(item);
+});
+
+router.post("/carts/:id", verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const productsId = req.params.id;
+    const quantity = req.body.quantity;
+    const item = await addToCart(userId, productsId, quantity);
+    res.send(item);
+});
+
+router.delete("/carts/:id", verifyToken, async (req, res) => {
+    const userId = req.user.id;
+    const productsId = req.params.id;
+    const items = await removefromCart(userId, productsId);
+    res.send(items);
+});
+
+// Order routes
+router.post("/order", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const orderData = req.body;
+        const order = await addOrder(userId, orderData);
+        res.status(201).send(order);
+    } catch (err) {
+        res.status(500).send({ error: err.message || "Failed to place order" });
+    }
+});
+
+router.get("/orders", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const orders = await getCustomerOrders(userId);
+        res.send(orders);
+    } catch (err) {
+        res.status(500).send({ error: err.message || "Failed to fetch orders" });
+    }
+});
 
 module.exports = router;
