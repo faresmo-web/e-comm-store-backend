@@ -1,7 +1,7 @@
 const expores = require("express");
 const mongoose = require("mongoose");
 const app = expores();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const cors = require("cors");
 const categoryRouter = require("./routes/category");
 const brandRouter = require("./routes/brand");
